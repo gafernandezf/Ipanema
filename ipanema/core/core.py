@@ -5,6 +5,8 @@ from ipanema.input import InputPlugin
 from ipanema.model import ModelPlugin
 from ipanema.output import OutputPlugin
 
+# NamedTuple
+
 class Core():
 
     def run_ipanema(self) -> None:
