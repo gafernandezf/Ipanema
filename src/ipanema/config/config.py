@@ -1,7 +1,7 @@
 CONFIG = {
 
     # "specific_input"
-    "params": "user_input",
+    "input": "user_input",
 
     # "specific_model"
     "model": "signal_peak_model",

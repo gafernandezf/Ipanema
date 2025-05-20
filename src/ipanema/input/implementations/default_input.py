@@ -1,8 +1,9 @@
 from ipanema.input.input_plugin import InputPlugin
 
-class UserInput(InputPlugin):
+class DefaultInput(InputPlugin):
 
     @staticmethod
     def getParams() -> dict:
         """Prepares data for a model initialization."""
-        pass
+        params: dict = {}
+        return params

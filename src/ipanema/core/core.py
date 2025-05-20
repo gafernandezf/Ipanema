@@ -9,6 +9,7 @@ from ipanema.output import OutputPlugin
 
 class Core():
 
+    @staticmethod
     def run_ipanema(self) -> None:
         """Ipanema execution using 'ipanema.config'."""
 
@@ -16,7 +17,7 @@ class Core():
         input_path = "ipanema.input.implementations"
         input_file_name = CONFIG.get(
             "input",
-            "user_input"
+            "default_input"
         )
         input_path = ".".join([input_path, input_file_name])
 
@@ -24,7 +25,7 @@ class Core():
         model_path = "ipanema.model.implementations"
         model_file_name = CONFIG.get(
             "model",
-            "signal_peak_model"
+            "default_model"
         )
         model_path = ".".join([model_path, model_file_name])
 
@@ -73,7 +74,7 @@ class Core():
         for output in outputs:
             output.generate_results(model)
 
-
+    @staticmethod
     def _class_from_file(file_name: str) -> str:
         """Parses the file name (without file extension) to class name."""
         return "".join(token.capitalize() for token in file_name.split("_"))

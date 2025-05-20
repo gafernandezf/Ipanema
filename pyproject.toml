@@ -1,12 +1,18 @@
-
-
 [project]
 name = "ipanema"
 version = "0.1.0"
 dependencies = [
+  "numpy",
   "pycuda",
-  "numpy"
+  "iminuit",
+  "pytest",
+  "reikna"
 ]
-
-[tool.hatch.envs.default]
-python = "3.10"  # o la versión que uses
+requires-python = ">= 3.10"
+authors = [
+  {name= "Gabriel Fernandez", email= "gabriel.fernandez1@udc.es"}
+]
+maintainers = [
+  {name= "Gabriel Fernandez", email= "gabriel.fernandez1@udc.es"}
+]
+readme = {file = "README.txt", content-type = "text/markdown"}

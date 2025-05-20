@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 
 from ipanema.model import ModelPlugin
 
+# Protocol
+
 class OutputPlugin(ABC):
     """Abstraction of a generic output plugin"""
 
