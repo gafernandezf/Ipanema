@@ -22,25 +22,34 @@ class Core():
         ]
 
         # Path definition for the input
-        input_path = "ipanema.input.implementations"
-        input_file_name = CONFIG.get(
+        input_path: str = "ipanema.input.implementations"
+        input_file_name: str = CONFIG.get(
             "input",
             "default_input"
         )
+        if not input_file_name.strip():
+            input_file_name = "default_input"
 
         # Path definition for the model
-        model_path = "ipanema.model.implementations"
-        model_file_name = CONFIG.get(
+        model_path: str = "ipanema.model.implementations"
+        model_file_name: str = CONFIG.get(
             "model",
             "default_model"
         )
+        if not model_file_name.strip():
+            model_file_name = "default_model"
 
         # Path definition for the outputs
-        output_path = "ipanema.output.implementations"
-        output_file_names = CONFIG.get(
+        output_path: str = "ipanema.output.implementations"
+        output_file_names: list[str] = CONFIG.get(
             "outputs", 
             ["command_line_output"]
         )
+        output_file_names = [
+            output for output in output_file_names if output.strip()
+        ]
+        if not output_file_names:
+            output_file_names = ["command_line_output"]
         
         # Input Module import
         input_module = self._retrieve_module(
@@ -66,16 +75,16 @@ class Core():
         # Input Class import
         InputClass = getattr(
             input_module,
-            self._class_from_file(input_file_name)
+            self._class_from_module(input_file_name)
         )
         # Model Class import
         ModelClass = getattr(
             model_module,
-            self._class_from_file(model_file_name)
+            self._class_from_module(model_file_name)
         )
         # Output Classes import
         output_classes = [
-            getattr(o_module, self._class_from_file(o_file_name))
+            getattr(o_module, self._class_from_module(o_file_name))
             for o_module, o_file_name in zip(output_modules, output_file_names)
         ]
 
@@ -122,7 +131,7 @@ class Core():
             raise e
 
     @staticmethod
-    def _class_from_file(file_name: str) -> str:
+    def _class_from_module(file_name: str) -> str:
         """Parses the file name (without file extension) to class name."""
         return "".join(token.capitalize() for token in file_name.split("_"))
     
