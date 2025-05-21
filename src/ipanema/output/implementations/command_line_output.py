@@ -4,7 +4,7 @@ from ipanema.output import OutputPlugin
 class CommandLineOutput(OutputPlugin):
     """Abstraction of a generic output plugin"""
 
-    def generate_results(model: ModelPlugin) -> None:
+    def generate_results(self, model: ModelPlugin) -> None:
         """
         Prints results via command line for a fitted model.
         

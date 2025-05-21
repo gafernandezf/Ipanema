@@ -1,3 +1,3 @@
-from ipanema.core import run_ipanema
+from ipanema.core.core import Core
 
-__all__ = ["run_ipanema"]
+__all__ = ["Core"]

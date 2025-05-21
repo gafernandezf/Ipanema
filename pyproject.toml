@@ -16,3 +16,8 @@ maintainers = [
   {name= "Gabriel Fernandez", email= "gabriel.fernandez1@udc.es"}
 ]
 readme = {file = "README.txt", content-type = "text/markdown"}
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/*.py"
+]

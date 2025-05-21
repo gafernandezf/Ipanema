@@ -1,4 +1,9 @@
 import importlib
+import importlib.util
+
+from pathlib import Path
+from types import ModuleType
+from venv import logger
 
 from ipanema.config.config import CONFIG
 from ipanema.input import InputPlugin
@@ -9,9 +14,12 @@ from ipanema.output import OutputPlugin
 
 class Core():
 
-    @staticmethod
     def run_ipanema(self) -> None:
         """Ipanema execution using 'ipanema.config'."""
+
+        custom_paths: list[Path] = [
+            Path(path) for path in CONFIG.get("custom_paths", [])
+        ]
 
         # Path definition for the input
         input_path = "ipanema.input.implementations"
@@ -19,7 +27,6 @@ class Core():
             "input",
             "default_input"
         )
-        input_path = ".".join([input_path, input_file_name])
 
         # Path definition for the model
         model_path = "ipanema.model.implementations"
@@ -27,25 +34,33 @@ class Core():
             "model",
             "default_model"
         )
-        model_path = ".".join([model_path, model_file_name])
 
         # Path definition for the outputs
         output_path = "ipanema.output.implementations"
         output_file_names = CONFIG.get(
-            "output", 
+            "outputs", 
             ["command_line_output"]
         )
-        output_paths = [
-            ".".join([output_path, o]) for o in output_file_names
-        ]
         
         # Input Module import
-        input_module = importlib.import_module(input_path)
+        input_module = self._retrieve_module(
+            custom_paths, 
+            input_path, 
+            input_file_name
+        )
         # Model Module import
-        model_module = importlib.import_module(model_path)
+        model_module = self._retrieve_module(
+            custom_paths, 
+            model_path, 
+            model_file_name
+        )
         # Output Modules import
         output_modules = [
-            importlib.import_module(o) for o in output_paths
+            self._retrieve_module(
+                custom_paths, 
+                output_path, 
+                output_file_name
+            ) for output_file_name in output_file_names
         ]
 
         # Input Class import
@@ -65,7 +80,7 @@ class Core():
         ]
 
         # Preparing the model fit with the parameters
-        model: ModelPlugin = ModelClass(InputClass.getParams())
+        model: ModelPlugin = ModelClass(InputClass.get_params())
         model.prepare_fit()
         # Model fit and Results presentation
         outputs: list[OutputPlugin] = [
@@ -73,6 +88,38 @@ class Core():
         ]
         for output in outputs:
             output.generate_results(model)
+        
+    @staticmethod
+    def _retrieve_module(
+            custom_paths: list[Path], 
+            default_path: str,
+            module_name: str,
+        ) -> ModuleType:
+
+        for path in custom_paths:
+            if path.exists():
+                try:
+                    file_name = ".".join([module_name, "py"])
+                    spec = importlib.util.spec_from_file_location(
+                        module_name, 
+                        path.joinpath(file_name)
+                    )
+                    if spec:
+                        module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(module)
+                        return module
+                except (FileNotFoundError) as e:
+                    pass # File not in this custom path
+                except Exception as e:
+                    logger.error(f"Problem searching module '{module_name}' \
+                                 at path '{path}': {e}")
+        default_module = ".".join([default_path, module_name])
+        try:
+            return importlib.import_module(default_module)
+        except Exception as e:
+            logger.critical(f"Error importing default module \
+                                '{default_module}': {e}")
+            raise e
 
     @staticmethod
     def _class_from_file(file_name: str) -> str:

@@ -14,7 +14,7 @@ class DefaultModel(ModelPlugin):
         """Fits this model using parameters provided during initialization."""
         
         # Minuit Fit Manager Initialization
-        self._fit_manager = Minuit(self._generate_fcn())
+        self.fit_manager = Minuit(self._generate_fcn(), 1)
 
     def _generate_fcn(self):
         

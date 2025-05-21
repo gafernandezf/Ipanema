@@ -1,7 +1,7 @@
 from ipanema.model import ModelPlugin
 from iminuit import Minuit
-from sdk.cuda_manager import CudaManager
-from sdk.cuda_manager import AutoCudaManager
+from sdk.cuda_manager.abstract_cuda_manager import CudaManager
+from sdk.cuda_manager.implementations.auto_cuda_manager import AutoCudaManager
 import numpy as np
 import math
 

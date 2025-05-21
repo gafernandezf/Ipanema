@@ -22,6 +22,7 @@ class ModelPlugin(ABC):
         """Getter for fit_manager property"""
         return self._fit_manager
     
+    # Setter for fit_manager
     @fit_manager.setter
     def fit_manager(self, manager: Minuit):
         self._fit_manager = manager

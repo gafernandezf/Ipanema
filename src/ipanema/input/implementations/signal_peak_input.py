@@ -2,10 +2,10 @@ from ipanema.input.input_plugin import InputPlugin
 import pickle
 import numpy as np
 
-class UserInput(InputPlugin):
+class SignalPeakInput(InputPlugin):
 
     @staticmethod
-    def getParams() -> dict:
+    def get_params() -> dict:
         """Prepares data for a model initialization."""
 
         sd = "float64"
