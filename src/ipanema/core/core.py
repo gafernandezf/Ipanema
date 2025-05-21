@@ -1,5 +1,6 @@
 import importlib
 import importlib.util
+import time
 
 from pathlib import Path
 from types import ModuleType
@@ -90,13 +91,19 @@ class Core():
 
         # Preparing the model fit with the parameters
         model: ModelPlugin = ModelClass(InputClass.get_params())
-        model.prepare_fit()
+
+        # Start time for calculation time
+        start_time: float = time.time()
         # Model fit and Results presentation
+        model.prepare_fit()
         outputs: list[OutputPlugin] = [
             OutputClass() for OutputClass in output_classes
         ]
         for output in outputs:
             output.generate_results(model)
+        # End of execution
+        end_time: float = time.time()
+        print (f"Calculation time: {end_time - start_time:.10f} seconds")
         
     @staticmethod
     def _retrieve_module(
