@@ -46,7 +46,9 @@ __global__ void logIpatia(double *in, double *out,double mu, double sigma, doubl
   int idx = threadIdx.x + blockDim.x * blockIdx.x;//+ threadIdx.y*4;
   out[idx] = log_apIpatia(in[idx],mu, sigma, l, beta, a, n, a2, n2);
 }
-__global__ void Ipatia(double *in, double *out,double mu, double sigma, double l, double beta, double a, double n, double a2, double n2) {
+__global__ void Ipatia(double *in, double *out,double mu, double sigma, double l, double beta, double a, double n, double a2, double n2, int N) {
   int idx = threadIdx.x + blockDim.x * blockIdx.x;//+ threadIdx.y*4;
-  out[idx] = exp(log_apIpatia(in[idx],mu, sigma, l, beta, a, n, a2, n2));
+  if (idx < N) {
+        out[idx] = exp(log_apIpatia(in[idx], mu, sigma, l, beta, a, n, a2, n2));
+    }
 }

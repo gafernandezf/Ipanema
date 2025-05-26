@@ -1,7 +1,10 @@
+from pathlib import Path
+from venv import logger
 from ipanema.model import ModelPlugin
 from iminuit import Minuit
 from sdk.cuda_manager.abstract_cuda_manager import CudaManager
 from sdk.cuda_manager.implementations.auto_cuda_manager import AutoCudaManager
+from sdk.cuda_manager.implementations.interactive_cuda_manager import InteractiveCudaManager
 import numpy as np
 import math
 
@@ -18,38 +21,51 @@ class SignalPeakModel(ModelPlugin):
     def __init__(self, params):
         """Initializes the model."""
         super().__init__(params)
-        self.cuda_manager = AutoCudaManager()
+        self.cuda_manager = InteractiveCudaManager(0, False)
 
     def prepare_fit(self) -> None:
         """Fits this model using parameters provided during initialization."""
+
+        logger.info("Preparing Fit Manager")
+
         Ndat = self.parameters["Ndat"]
-        self.cuda_manager.add_code_fragment("Path of Ipatia.cu")
+        self.cuda_manager.add_code_fragment(
+            "ipatia",
+            Path(
+                r"src\ipanema\model\implementations\support_files\ipatia.cu"
+            )
+        )
 
         # Minuit Fit Manager Initialization
-        self._fit_manager = Minuit(
+        self.fit_manager = Minuit(
             self._generate_fcn(), 
             mu = 5365., 
-            limit_mu = (5360., 5370.), 
             sigma = 7., 
-            limit_sigma= (5.,9.), 
             l = -3., 
-            limit_l= (-5.,-1.),
             beta = 0., 
-            limit_beta = (-1e-03,1e-03), 
             a = 3., 
-            fix_a = True, 
             n = 1,
             a2 = 6, 
-            limit_k = (-0.05,0), 
-            limit_Ns = (0.1*Ndat, 1.1*Ndat), 
-            limit_Nb = (0.1*Ndat,1.1*Ndat),
             Ns = 0.3*Ndat, 
             Nb = 0.7*Ndat, 
-            fix_a2 = True, 
             n2 = 1, 
-            fix_n = True, 
-            fix_n2 = True
+            k = -0.05
         )
+
+        self.fit_manager.limits["mu"] = (5360., 5370.)
+        self.fit_manager.limits["sigma"] = (5., 9.)
+        self.fit_manager.limits["l"] = (-5., -1.)
+        self.fit_manager.limits["beta"] = (-1e-3, 1e-3)
+        self.fit_manager.limits["k"] = (-0.05, 0)
+        self.fit_manager.limits["Ns"] = (0.1*Ndat, 1.1*Ndat)
+        self.fit_manager.limits["Nb"] = (0.1*Ndat, 1.1*Ndat)
+
+        self.fit_manager.fixed["a"] = True
+        self.fit_manager.fixed["a2"] = True
+        self.fit_manager.fixed["n"] = True
+        self.fit_manager.fixed["n2"] = True
+
+        logger.info("Fit Manager Fully Initialized")
 
     def _generate_fcn(self):
 
@@ -65,24 +81,27 @@ class SignalPeakModel(ModelPlugin):
         # Declaring FCN
         def fcn(mu, sigma, l, beta, a, n, a2, n2, k, Ns, Nb):
             # Calling ipatia for mass_bins
+            grid_x = math.ceil(len(mydat) / 512)
+            grid = (grid_x, 1)
+            block = (512, 1, 1)
             ipatia_bins_out: list = self.cuda_manager.run_program(
-                "ipatia",
+                "Ipatia",
                 [1],
-                {1: [[len(massbins)], np.double]},
-                (1000,1,1),
-                (len(mydat)/1000,1),
-                [
-                    massbins, 
-                    np.empty_like(massbins), 
-                    mu, 
-                    sigma, 
-                    l, 
-                    beta, 
-                    a, 
-                    n, 
-                    a2, 
-                    n2
-                ]
+                {1: [(len(massbins),), np.double]},
+                block,
+                grid,
+                massbins, 
+                np.empty_like(massbins), 
+                mu, 
+                sigma, 
+                l, 
+                beta, 
+                a, 
+                n, 
+                a2, 
+                n2,
+                len(mydat)
+                
             )
             integral_ipa = np.sum(ipatia_bins_out[0])*DM
 
@@ -99,31 +118,36 @@ class SignalPeakModel(ModelPlugin):
 
             # Calling ipatia for my_dat
             ipatia_data_out: list = self.cuda_manager.run_program(
-                "ipatia",
+                "Ipatia",
                 [1],
-                {1: [[len(massbins)], np.double]},
-                (512,1,1),
-                (len(mydat)/512,1),
-                [
-                    mydat, 
-                    np.empty_like(mydat), 
-                    mu, 
-                    sigma, 
-                    l, 
-                    beta, 
-                    a, 
-                    n, 
-                    a2, 
-                    n2
-                ]
+                {1: [(len(massbins)), np.double]},
+                block,
+                grid,
+                mydat, 
+                np.empty_like(mydat), 
+                mu, 
+                sigma, 
+                l, 
+                beta, 
+                a, 
+                n, 
+                a2, 
+                n2,
+                len(mydat)
             )
             # Exponential background
-            bkg_gpu = self.cuda_manager.single_operation("exp",[k*mydat])
-
+            bkg_gpu = self.cuda_manager.single_operation("exp",k*mydat)
+            term1 = bkg_gpu * invint_b * fb
+            print(f"\nterm 1 (shape {term1.shape} , type {type(term1)}): {term1}")
+            term2 = ipatia_data_out[0] * invint_s * fs
+            print(f"ipatia data: {ipatia_data_out[0]}")
+            print(f"term2 (shape {term2.shape} , type {type(term2)}): {term2}")
+            sum_terms = term1 + term2
+            print(f"sum terms (shape {sum_terms.shape} , type {type(sum_terms)}) : {sum_terms}\n\n")
             # Calculate total likelihood
             LL_gpu = self.cuda_manager.single_operation(
                 "log", 
-                [fs*invint_s*ipatia_data_out[0] + fb*invint_b*bkg_gpu]
+                sum_terms
             ) - Nexp
             extendLL =  Ndat*math.log(Nexp) -(Nexp)
             LL = np.float64(
