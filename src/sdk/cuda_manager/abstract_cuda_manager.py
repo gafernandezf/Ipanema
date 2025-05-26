@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Tuple
-from sdk.cuda_manager import  CudaProgram
+from sdk.cuda_manager.cuda_program import  CudaProgram
 
 class CudaManager(ABC):
     """Abstraction of a generic CUDA handler for Python."""
