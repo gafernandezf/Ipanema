@@ -1,5 +1,6 @@
 import importlib
 import importlib.util
+import logging
 import time
 
 from pathlib import Path
@@ -14,6 +15,13 @@ from ipanema.output import OutputPlugin
 # NamedTuple
 
 class Core():
+
+    def __init__(self):
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s'
+        )
+
 
     def run_ipanema(self) -> None:
         """Ipanema execution using 'ipanema.config'."""
