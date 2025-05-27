@@ -1,16 +1,14 @@
-from venv import logger
-from reikna import cluda
-from pathlib import Path
-from typing import Optional
-from pycuda.tools import clear_context_caches
-import pycuda.driver as cuda
 import atexit
-
+from typing import Optional
+from venv import logger
+import pycuda.driver as cuda
+from pycuda.tools import clear_context_caches
+from reikna import cluda
 from sdk.cuda_manager.implementations.pycuda_cuda_manager import PyCudaManager
 
 class InteractiveCudaManager(PyCudaManager):
     """
-    Wrapper class for a PyCuda's Custom Context.
+    Cuda Handler with a PyCuda's Custom Context.
 
     Allows the user to select a specific device for GPU executions.
     """
@@ -31,7 +29,7 @@ class InteractiveCudaManager(PyCudaManager):
         work. This function is meant to be called just once at the
         beginning of a script. Any other call will be ignored.
 
-        Args:
+        Arguments:
             idev (int): device to work with. If "None", and 
                 "interactive = False" use the first found.
             interactive (bool): determine whether to ask for a device or 

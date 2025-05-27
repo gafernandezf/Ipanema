@@ -1,17 +1,16 @@
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any, Tuple
 from functools import singledispatchmethod
-from pycuda.compiler import SourceModule
+from typing import Any
+import numpy as np
 import pycuda.cumath
 import pycuda.gpuarray
-from sdk.cuda_manager.abstract_cuda_manager import CudaManager
-# El propio import de autoinit crea un contexto automatico
-import numpy as np
 import pycuda.gpuarray as gpuarray
+from pycuda.compiler import SourceModule
+from sdk.cuda_manager.abstract_cuda_manager import CudaManager
+
 
 class PyCudaManager(CudaManager, ABC):
-    """Wrapper class for PyCuda's Automatic Context"""
+    """Cuda Handler which uses PyCuda."""
 
     @abstractmethod
     def _initialize_context(self) -> None:
@@ -27,13 +26,46 @@ class PyCudaManager(CudaManager, ABC):
             func_name: str,
             outputs_idx: list[int],
             outputs_details: dict[
-                int, Tuple[Tuple[int, ...], Any]
+                int, tuple[tuple[int, ...], Any]
             ],
-            block: Tuple[int, int, int] = (256,1,1),
-            grid: Tuple[int, int] = (1,1),
+            block: tuple[int, int, int] = (256,1,1),
+            grid: tuple[int, int] = (1,1),
             *args
     ) -> list:
-        """Runs a specific sequence of CUDA functions."""
+        """
+        Runs a specific CUDA function previously registered.
+
+        Runs the CUDA source code, executes the kernel with the provided arguments,
+        and returns the results of output buffers.
+
+        Arguments:
+            func_name (str): Name of the called function.
+            output_idx (list[int]): Indices of the arguments that are 
+                output buffers.
+            output_details (dict[int, tuple[tuple[int, ...], Any]): Formal
+                description of each argument following the structure
+                'output_idx : (shape, dtype)'.
+            block (tuple[int, int, int], optional): CUDA block dimensions. 
+                Defaults to (256,1,1).
+            grid (tuple[int, int], optional): CUDA grid dimensions. 
+                Defaults to (1,1).
+            *args: Parameters for the CUDA function.
+
+        Return:
+            list: List with each one of the outputs from the CUDA function
+
+        Example:
+            >>> outputs = cuda_manager.run_program(
+            ...     "MyKernel",
+            ...     [1],
+            ...     {1: ((100,), np.float64)},
+            ...     block=(256,1,1),
+            ...     grid=(10,1),
+            ...     input_array, np.empty(100), 42
+            ... )
+            >>> print(outputs[0].shape)
+            (100,)
+        """
 
         processed_args: list[np.generic | np.ndarray] = []
         gpu_args: list[np.generic | np.ndarray] = []
@@ -77,11 +109,20 @@ class PyCudaManager(CudaManager, ABC):
         """
         Performs a simple operation using CUDA.
         
-        Gives access to functions defined by 'pycuda.cumath'.
+        Provides access to GPU-accelerated functions defined by 'pycuda.cumath'.
+        Handles any GPU-compatible processing needed for its execution. 
 
-        Args:
-            func_name (str): name of the desired operation
-            *args: arguments needed for the desired operation
+        Arguments:
+            func_name (str): Name of the desired CUDA operation implemented 
+                by 'pycuda.cumath'.
+            *args: List of arguments needed for the desired operation that will
+                be processed for GPU-compatibility.
+
+        Returns:
+            Any: A host copy of the result of the CUDA operation
+
+        Raises:
+            AttributeError: If 'func_name' does not exist in 'pycuda.cumath'
         """
 
         if hasattr(pycuda.cumath, func_name):
@@ -96,7 +137,24 @@ class PyCudaManager(CudaManager, ABC):
             )
 
     def reduction_operation(self, op_name: str, array: Any) -> Any:
-        """Performs a reduction operation for a specific array"""
+        """
+        Performs a reduction operation for an array using 'pycuda.gpuarray'.
+
+        Provides access to reduction operations (sum, max, min, etc.) defined 
+        by 'pycuda.cumath'. Handles any GPU-compatible processing needed for 
+        its execution. 
+
+        Arguments:
+            op_name (str): Name of the desired reduction operation implemented 
+                by 'pycuda.gpuarray'.
+            array (Any): Data array to be reduced.
+
+        Returns:
+            Any: A host copy of the result of the reduction operation.
+
+        Raises:
+            AttributeError: If 'op_name' does not exist in 'pycuda.gpuarray'
+        """
         if not isinstance(array, gpuarray.GPUArray):
             array = gpuarray.to_gpu(array)
 
@@ -114,6 +172,14 @@ class PyCudaManager(CudaManager, ABC):
 
     @singledispatchmethod
     def _process_argument(self, arg, gpu_args: list) -> None:
+        """
+        Prepares parameters for GPU execution.
+        
+        Arguments:
+            arg (Any): argument to be processed.
+            gpu_args (list): list where the processed argument will be added if
+                admitted.
+        """
         raise TypeError(
             f"Type {type(arg)} not admitted for a function"
         )
@@ -146,7 +212,7 @@ class PyCudaManager(CudaManager, ABC):
 
     @_process_argument.register(float)
     def _(self, arg: float, gpu_args: list) -> None:
-        gpu_args.append(np.float32(arg))
+        gpu_args.append(np.float64(arg))
 
     @_process_argument.register(list)
     def _(self, arg: list, gpu_args: list) -> None:

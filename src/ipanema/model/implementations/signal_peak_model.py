@@ -1,5 +1,4 @@
 from pathlib import Path
-from venv import logger
 from ipanema.model import ModelPlugin
 from iminuit import Minuit
 from sdk.cuda_manager.abstract_cuda_manager import CudaManager
@@ -25,8 +24,6 @@ class SignalPeakModel(ModelPlugin):
 
     def prepare_fit(self) -> None:
         """Fits this model using parameters provided during initialization."""
-
-        logger.info("Preparing Fit Manager")
 
         Ndat = self.parameters["Ndat"]
         self.cuda_manager.add_code_fragment(
@@ -64,8 +61,6 @@ class SignalPeakModel(ModelPlugin):
         self.fit_manager.fixed["a2"] = True
         self.fit_manager.fixed["n"] = True
         self.fit_manager.fixed["n2"] = True
-
-        logger.info("Fit Manager Fully Initialized")
 
     def _generate_fcn(self):
 
@@ -138,12 +133,8 @@ class SignalPeakModel(ModelPlugin):
             # Exponential background
             bkg_gpu = self.cuda_manager.single_operation("exp",k*mydat)
             term1 = bkg_gpu * invint_b * fb
-            print(f"\nterm 1 (shape {term1.shape} , type {type(term1)}): {term1}")
             term2 = ipatia_data_out[0] * invint_s * fs
-            print(f"ipatia data: {ipatia_data_out[0]}")
-            print(f"term2 (shape {term2.shape} , type {type(term2)}): {term2}")
             sum_terms = term1 + term2
-            print(f"sum terms (shape {sum_terms.shape} , type {type(sum_terms)}) : {sum_terms}\n\n")
             # Calculate total likelihood
             LL_gpu = self.cuda_manager.single_operation(
                 "log", 

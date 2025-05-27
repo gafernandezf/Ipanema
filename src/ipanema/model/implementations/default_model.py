@@ -5,7 +5,6 @@ from iminuit import Minuit
 class DefaultModel(ModelPlugin):
     """Fit of an example function."""
 
-
     def __init__(self, params):
         """Initializes the model."""
         super().__init__(params)
@@ -14,13 +13,13 @@ class DefaultModel(ModelPlugin):
         """Fits this model using parameters provided during initialization."""
         
         # Minuit Fit Manager Initialization
-        self.fit_manager = Minuit(self._generate_fcn(), 1)
+        self.fit_manager = Minuit(self._generate_fcn(), x=1)
 
     def _generate_fcn(self):
         
         # Declaring FCN
         def fcn(x):
-            return x
+            return (x - 3)**2
 
         return fcn
 
