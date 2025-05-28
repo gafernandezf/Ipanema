@@ -10,7 +10,7 @@ from sdk.cuda_manager.abstract_cuda_manager import CudaManager
 
 
 class PyCudaManager(CudaManager, ABC):
-    """Cuda Handler which uses PyCuda."""
+    """Cuda Handler for PyCuda."""
 
     @abstractmethod
     def _initialize_context(self) -> None:
@@ -179,6 +179,8 @@ class PyCudaManager(CudaManager, ABC):
             arg (Any): argument to be processed.
             gpu_args (list): list where the processed argument will be added if
                 admitted.
+        Raises:
+            TypeError: If the provided argument type is not supported.
         """
         raise TypeError(
             f"Type {type(arg)} not admitted for a function"

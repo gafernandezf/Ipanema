@@ -1,16 +1,25 @@
 from pathlib import Path
-from venv import logger
 from ipanema.input.input_plugin import InputPlugin
 import pickle
 import numpy as np
 
 class SignalPeakInput(InputPlugin):
+    """
+    Plugin dedicated to the parameter processing and parsing for a fit to a 
+    signal peak on top of an exponential background.  
+    """
 
     @staticmethod
     def get_params() -> dict:
-        """Prepares data for a model initialization."""
+        """
+        Prepares data for a model initialization.
+        
+        Defines a dictionary containing the parameters needed by 
+        SignalPeakModel.
 
-        logger.info("Processing Parameters")
+        Returns:
+            dict: Dictionary formed by the expected parameters.
+        """
 
         sd = "float64"
         dtype = getattr(np, sd)
@@ -25,19 +34,17 @@ class SignalPeakInput(InputPlugin):
         ) as file:
             data = pickle.load(file, encoding="latin1")
         mydat = dtype(data[0])
-        Ndat = len(mydat)
+        n_dat = len(mydat)
         massbins = dtype(data[1])
-        DM = dtype(massbins[1] - massbins[0])
-        Mmax = max(massbins)
-        Mmin = min(massbins)
+        d_m = dtype(massbins[1] - massbins[0])
+        m_max = max(massbins)
+        m_min = min(massbins)
 
         params["mydat"] = mydat
-        params["Ndat"] = Ndat
-        params["DM"] = DM
-        params["Mmax"] = Mmax
-        params["Mmin"] = Mmin
+        params["n_dat"] = n_dat
+        params["d_m"] = d_m
+        params["m_max"] = m_max
+        params["m_min"] = m_min
         params["massbins"] = massbins
-
-        logger.info("Parameters Fully Processed")
         
         return params

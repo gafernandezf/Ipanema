@@ -20,6 +20,16 @@ from ipanema.output import OutputPlugin
 # Namedtuple
 
 class Core():
+    """
+    Main handler class for Ipanema's Plugin Based System.
+
+    Attributes:
+        PluginType (Enum): Enum for identifying plugin types 
+            (input, model, output).
+        PluginPath (Enum): Enum for defining base module paths for each 
+            plugin type.
+        DefaultPlugin (Enum): Enum for defining default plugin names.
+    """
 
     class PluginType(Enum):
         INPUT: str = "input"
@@ -81,9 +91,7 @@ class Core():
         logger.info(f"Preparing model '{ModelClass}' for fitting")
         try:
             model: ModelPlugin = ModelClass(parameters)
-            # Start time for calculation time
             start_time: float = time.time()
-            # Model fit and Results presentation
             model.prepare_fit()
         except Exception as e:
             logger.exception(
@@ -112,7 +120,7 @@ class Core():
                     "Problem during fit manager execution or results",
                     e
                 ) from e
-        # End of execution
+            
         end_time: float = time.time()
         logger.info(f"Calculation time: {end_time - start_time:.10f} seconds")
         

@@ -8,7 +8,7 @@ from sdk.cuda_manager.implementations.pycuda_cuda_manager import PyCudaManager
 
 class InteractiveCudaManager(PyCudaManager):
     """
-    Cuda Handler with a PyCuda's Custom Context.
+    Cuda Handler for a PyCuda's Custom Context.
 
     Allows the user to select a specific device for GPU executions.
     """
@@ -24,19 +24,20 @@ class InteractiveCudaManager(PyCudaManager):
             interactive: bool=True
         ):
         """
-        Initialize CUDA. This function substitutes "make_default_context"
-        function from PyCuda. It allows to correctly select the device to
-        work. This function is meant to be called just once at the
-        beginning of a script. Any other call will be ignored.
+        Initializes a CUDA constext. 
+        
+        This function substitutes 'make_default_context' function from PyCuda. 
+        It allows to correctly select the device to work. If 'idev' has a 
+        device number indicated instead of None the manager will select 
+        that device (if possible). Otherwise, 'interactive' will be processed. 
+        If 'interactive' is True the manager will ask the user to select a 
+        device. If 'interactive' is False the manager will select the default 
+        device (first device found).
 
         Arguments:
-            idev (int): device to work with. If "None", and 
-                "interactive = False" use the first found.
-            interactive (bool): determine whether to ask for a device or 
-                to select the first device found
-
-        Returns:
-            None
+            idev (int): Device to work with.
+            interactive (bool): Determine whether to ask for a device or 
+                to select the first device found.
         """
         
         cuda.init()
@@ -44,7 +45,7 @@ class InteractiveCudaManager(PyCudaManager):
         ndev = cuda.Device.count()
         
         if ndev == 0:
-            raise LookupError('No devices have been found')
+            raise LookupError("No devices have been found")
         
         # Default device if anything fails
         defdev = 0
@@ -52,9 +53,9 @@ class InteractiveCudaManager(PyCudaManager):
         if idev is not None:
             # Use the specified device
             if idev >= ndev:
-                print(f'WARNING: Specified a device number ({idev}) greater \
-                    than the maximum number of devices ({ndev}); \
-                    set to {defdev}')
+                print(f"WARNING: Specified a device number ({idev}) greater "
+                      f"than the maximum number of devices ({ndev}); "
+                      f"set to {defdev}")
                 idev = defdev
                 
         elif not interactive:
@@ -63,14 +64,14 @@ class InteractiveCudaManager(PyCudaManager):
             
         else:
             # Ask the user to select a device
-            print(f'Found {ndev} available devices:')
+            print(f"Found {ndev} available devices:")
             for i in range(ndev):
-                print(f'- {cuda.Device(i).name()} [{i}]')
+                print(f"- {cuda.Device(i).name()} [{i}]")
                 
             idev = -1
             while True:
                 try:
-                    idev = input(f'Select a device (default {defdev}): ')
+                    idev = input(f"Select a device (default {defdev}): ")
                     if idev.strip() == '':
                         idev = defdev
                     idev = int(idev)
@@ -80,7 +81,7 @@ class InteractiveCudaManager(PyCudaManager):
                     logger.warning(f"Invalid input {idev}")
         
         device = cuda.Device(int(idev))
-        print(f'-- Using device "{device.name()}" [{idev}]')
+        logger.info(f"Using device \"{device.name()}\" [{idev}]")
         api = cluda.cuda_api()    
         
         self.device  = device
