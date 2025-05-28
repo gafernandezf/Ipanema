@@ -43,7 +43,7 @@ class SignalPeakModel(ModelPlugin):
         self.cuda_manager.add_code_fragment(
             "ipatia",
             Path(
-                r"src\ipanema\model\implementations\support_files\ipatia.cu"
+                r"src\ipanema\model\implementations\_support_files\ipatia.cu"
             )
         )
 

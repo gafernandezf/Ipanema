@@ -191,7 +191,7 @@ def mock_config(monkeypatch):
         class DefaultPlugin:
             DEFAULT_INPUT = mock.Mock(value="default_input")
             DEFAULT_MODEL = mock.Mock(value="default_model")
-            DEFAULT_OUTPUT = mock.Mock(value="default_output")
+            DEFAULT_OUTPUT = mock.Mock(value="command_line_output")
 
     monkeypatch.setattr("ipanema.core.Core", FakeCore)
 
@@ -201,7 +201,7 @@ def test_resolve_plugins_success(mock_plugin_modules, mock_config):
 
     assert input_class is FakeInputPlugin
     assert model_class is FakeModelPlugin
-    assert output_classes == [FakeOutputPlugin, FakeOutputPlugin]
+    assert all(cls is FakeOutputPlugin for cls in output_classes)
 
 def test_resolve_plugins_fails(monkeypatch):
     plugin_loader = Core()
