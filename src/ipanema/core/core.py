@@ -215,7 +215,8 @@ class Core():
                 )
             ]
         except Exception as e:
-            raise IpanemaImportError from e
+            raise IpanemaImportError(f"Problem during module import or "
+                                     f"class resolution: {e}") from e
         return InputClass, ModelClass, output_classes
 
     @staticmethod
