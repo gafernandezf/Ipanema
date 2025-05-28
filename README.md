@@ -1,4 +1,13 @@
 # Ipanema's New Version
 
-## Microkernel Arquitecture
+### Descripcion breve
+...
 
+### Ejemplo de uso
+...
+
+### Comandos básicos
+
+Ejecución: `hatch run python main.py`
+
+Testing: `hatch run pytest`
