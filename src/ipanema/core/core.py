@@ -266,8 +266,8 @@ class Core():
         try:
             return importlib.import_module(default_module)
         except Exception as e:
-            logger.critical(f"Error importing default module \
-                                '{default_module}': {e}")
+            logger.critical(f"Error importing default module "
+                            f"'{default_module}': {e}")
             raise e
 
     @staticmethod
