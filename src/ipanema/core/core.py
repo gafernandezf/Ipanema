@@ -258,7 +258,7 @@ class Core():
                         spec.loader.exec_module(module)
                         return module
                 except (FileNotFoundError) as e:
-                    pass # File not in this custom path
+                    continue # File not in this custom path
                 except Exception as e:
                     logger.exception(f"Problem searching module '{module_name}'"
                                      f" at path '{path}': {e}")
