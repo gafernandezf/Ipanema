@@ -91,7 +91,7 @@ class OutputPlugin():
 Model Plugins implemented by users may have other methods, but must use `generate_results` to start the sequence of actions leading to the execution of the model fit and results presentation.
 
 ***
-### How to implement a simulation
+### Example
 
 Users who want to implement their own models might follow steps similar to the ones shown below:
 
@@ -202,11 +202,6 @@ CONFIG = {
 5. Access the root directory of this project and run your simulation with the **Execution** command provided in **Basic Commands** section.
 
 ***
-### Example
-...
-
-***
-
 ### Getting Started
 
 #### 1. Clone the repository
