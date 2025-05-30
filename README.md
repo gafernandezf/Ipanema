@@ -92,7 +92,114 @@ Model Plugins implemented by users may have other methods, but must use `generat
 
 ***
 ### How to implement a simulation
-...
+
+Users who want to implement their own models might follow steps similar to the ones shown below:
+
+1. Implement an Input Plugin. Declare your parameters and return them in a dictionary:
+
+```python
+# file: example_input.py
+class ExampleInput(InputPlugin):
+
+    ...
+
+    @staticmethod
+    def get_params() -> dict:
+        params: dict = {}
+
+        param_1 = 1.0
+        param_2 = "string"
+        ...
+        param_n = np.ndarray([1, 2, 3])
+
+        params["param_1"] = param_1
+        params["param_2"] = param_2
+        ...
+        params["param_n"] = param_n
+        return params
+
+    ...
+```
+
+2. Implement a Model Plugin. Initialize your model using the parameters previously declared:
+```python
+# file: example_model.py
+class ExampleModel(ModelPlugin):
+
+    ...
+
+    def __init__(self, params):
+        super().__init__(params)
+
+    def prepare_fit(self) -> None:
+        
+        self.fit_manager = Minuit(
+            self._generate_fcn(), 
+            a = 2.4, 
+            b = 1.3, 
+            c = 3
+        )
+
+        self.fit_manager.limits["a"] = (2., 3.)
+        self.fit_manager.limits["b"] = (-1., 3.)
+        self.fit_manager.limits["c"] = (-5, 15)
+
+    def _generate_fcn(self):
+        params = self.parameters
+        param_1 = params["param_1"]
+        param_n = params["param_n"]
+
+        # Declaring FCN
+        def fcn(a, b, c):
+            result = a**2 + param_1
+            result += b * param_n[1] / np.float(c)
+
+            return result
+
+        return fcn
+    
+    ...
+
+```
+
+3. Implement an Output Plugin. Execute your model and present the results:
+   
+```python
+# file: example_output.py
+class ExampleOutput(OutputPlugin):
+
+    ...
+
+    def generate_results(self, model: ModelPlugin) -> None:
+        
+        model.fit_manager.migrad()
+        model.fit_manager.hesse()
+
+        print(f"\nFit Manager Values: \n{model.fit_manager.values}\n")
+        print(f"\nFit Manager Error: \n{model.fit_manager.errors}\n")
+
+    ...
+
+```
+4. Modify `config.py` so that Ipanema uses your plugins. Note that Ipanema expects the plugin names without their `.py` file extension in its configuration file:
+
+```python
+# file: config.py
+CONFIG = {
+
+    "custom_paths": ['if\\your\\plugins\\outside\\implementations\\directories'],
+
+    "input": "example_input",
+
+    "model": "example_model",
+
+    "outputs": [
+        "example_output"
+    ],
+}
+```  
+
+5. Access the root directory of this project and run your simulation with the **Execution** command provided in **Basic Commands** section.
 
 ***
 ### Example
@@ -101,7 +208,29 @@ Model Plugins implemented by users may have other methods, but must use `generat
 ***
 
 ### Getting Started
-...
+
+#### 1. Clone the repository
+```bash
+git clone https://github.com/GabrielFernandez1/Ipanema.git
+```
+
+#### 2. Install Hatch
+If your do not have hatch installed in your computer:
+```bash
+pip install hatch
+```
+
+#### 3. Set up the environment
+Use hatch to create and activate a development environment:
+```bash
+hatch shell
+```
+
+#### 4. Modify the configuration
+Adjust `config.py` to your necessities.
+
+#### 5. Run your simulation
+Use the **Execution** command in **Basic Commands** section.
 
 ***
 ### Basic Commands
