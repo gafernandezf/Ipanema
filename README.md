@@ -1,4 +1,27 @@
 # Ipanema v1.0 - Simulation Framework
+
+***
+### Index
+
+- [Ipanema v1.0 - Simulation Framework](#ipanema-v10---simulation-framework)
+    - [Index](#index)
+    - [Description](#description)
+      - [Ipanema](#ipanema)
+      - [SDK](#sdk)
+    - [The Plugins](#the-plugins)
+      - [Naming Convention](#naming-convention)
+      - [InputPlugin](#inputplugin)
+      - [ModelPlugin](#modelplugin)
+      - [OutputPlugin](#outputplugin)
+    - [Example](#example)
+    - [Getting Started](#getting-started)
+      - [1. Clone the repository](#1-clone-the-repository)
+      - [2. Install Hatch](#2-install-hatch)
+      - [3. Set up the environment](#3-set-up-the-environment)
+      - [4. Modify the configuration](#4-modify-the-configuration)
+      - [5. Run your simulation](#5-run-your-simulation)
+    - [Basic Commands](#basic-commands)
+
 ***
 ### Description
 This new version of Ipanema is designed to simplify the implementation process for any needed simulation. It separates the original workflow into a pipeline of simple plugins users can modify. Ipanema handles the remaining steps automatically.
@@ -29,7 +52,7 @@ This module contains 5 main packages:
 
 #### SDK
 
-This module provides a set of support libraries users may use for their own implementations.
+Its name stands for **Software Development Kit**. This module provides a set of support libraries users may use for their own implementations.
 
 Its present version has 2 main packages: 
 
@@ -41,6 +64,8 @@ Its present version has 2 main packages:
 ### The Plugins
 
 This section explains how to properly implement plugins.
+
+#### Naming Convention
 
 Note that for any given plugin a naming convention is used. The file which contains the plugin must have a snake_case name (e.g., `example_name_plugin.py`) while the class implementing the plugin must have the same name in PascalCase (e.g., `ExampleNamePlugin`).
 
