@@ -17,18 +17,19 @@ from ipanema.input import InputPlugin
 from ipanema.model import ModelPlugin
 from ipanema.output import OutputPlugin
 
-# Namedtuple
-
 class Core():
     """
-    Main handler class for Ipanema's Plugin Based System.
+    Main handler class for Ipanema's Plugin-Based System.
+
+    This class is responsible for coordinating the full workflow: 
+    dynamically loading input, model, and output plugins; preparing and fitting
+    the model; and displaying results via the specified output plugins.
 
     Attributes:
-        PluginType (Enum): Enum for identifying plugin types 
-            (input, model, output).
-        PluginPath (Enum): Enum for defining base module paths for each 
-            plugin type.
-        DefaultPlugin (Enum): Enum for defining default plugin names.
+        PluginType (Enum): Identifiers for plugin types (input, model, output).
+        PluginPath (Enum): Base module paths for resolving plugins.
+        DefaultPlugin (Enum): Fallback plugin names if none are specified 
+            in the config.
     """
 
     class PluginType(Enum):
@@ -56,17 +57,16 @@ class Core():
         """
         Executes the complete Ipanema workflow.
  
-        Prepares the model implemented in the model plugin using the parameters
-        defined in the input plugin. Finally, runs the model and generates the
-        results specified by the output plugins.
+        Loads the plugins specified in the configuration, prepares the model 
+        using parameters from the input plugin, runs the fit, and generates 
+        results via the output plugins.
 
         Raises:
-            IpanemaInitializationError: If Problems encountered during 
-                input plugin execution.
-            IpanemaFittingError: If Problems encountered during 
-                model plugin execution.
-            IpanemaOutputError: If Problems encountered during 
-                output plugins execution.
+            IpanemaInitializationError: If an error occurs during input plugin 
+                execution.
+            IpanemaFittingError: If an error occurs during model preparation.
+            IpanemaOutputError: If an error occurs while fitting the model or
+                generating output results.
         """
         try:
             InputClass, ModelClass, output_classes = self._resolve_plugins()
@@ -84,14 +84,13 @@ class Core():
                 f" from '{InputClass}'"
             )
             raise IpanemaInitializationError(
-                "Problem obtaining input parameters",
-                e
+                "Problem obtaining input parameters"
             ) from e
 
         logger.info(f"Preparing model '{ModelClass}' for fitting")
+        model: ModelPlugin = ModelClass(parameters)
+        start_time: float = time.time()
         try:
-            model: ModelPlugin = ModelClass(parameters)
-            start_time: float = time.time()
             model.prepare_fit()
         except Exception as e:
             logger.exception(
@@ -99,17 +98,16 @@ class Core():
                 f" in '{ModelClass}'"
             )
             raise IpanemaFittingError(
-                "Problem during fit manager preparation", 
-                e
+                "Problem during fit manager preparation"
             ) from e
         
         for OutputClass in output_classes:
-            try:
-                output: OutputPlugin = OutputClass()
-                logger.info(
+            output: OutputPlugin = OutputClass()
+            logger.info(
                     f"Starting Results Generation on '{OutputClass}'"
                     f" for model '{ModelClass}'"
                 )
+            try:   
                 output.generate_results(model)
             except Exception as e:
                 logger.exception(
@@ -117,8 +115,7 @@ class Core():
                     f"presentation in '{OutputClass}'"
                 )
                 raise IpanemaOutputError(
-                    "Problem during fit manager execution or results",
-                    e
+                    "Problem during fit manager execution or results"
                 ) from e
             
         end_time: float = time.time()
@@ -132,12 +129,18 @@ class Core():
             list[type[OutputPlugin]]
         ]:
         """
-        Dynamically loads the input, model and output plugins specified 
-        in 'ipanema.config'.
+        Dynamically loads the input, model, and output plugins specified 
+        in the configuration.
+
+        Returns:
+            tuple:
+                - InputPlugin class
+                - ModelPlugin class
+                - List of OutputPlugin classes
 
         Raises:
-            IpanemaImportError: If problems encountered during module importing
-                or class resolution.
+            IpanemaImportError: If a problem occurs while importing a module 
+                or resolving a class.
         """
         
         try:
@@ -226,24 +229,24 @@ class Core():
             module_name: str,
         ) -> ModuleType:
         """
-        Loads dinamically a Python module given a list of custom file paths,
-        importing from 'default_path' if not found elsewhere.
+        Dynamically loads a Python module from either custom paths or a 
+        default module path.
 
-        Searches for a '.py' file matching 'module_name' in each path of 
-        'custom_paths'. If the specified module is not found in any of the
-        custom file paths it tries to import it from 'default_path' using
-        'importlib.import_module'.
+        Tries to find and import a module named `module_name.py` from each 
+        path in `custom_paths`. If not found, attempts to import the module 
+        from `default_path` using standard Python import mechanisms.
 
-        Arguments:
-            custom_paths (list[Path]): List of custom file paths.
-            default_path (str): Standard dot-separated Python package path.
-            module_name (str): Name of the '.py' file to search.
+        Args:
+            custom_paths (list[Path]): List of custom file system paths 
+                to search.
+            default_path (str): Dot-separated Python module path as a fallback.
+            module_name (str): Name of the module (without '.py') to import.
 
         Returns:
-            ModuleType: A Python module imported.
+            ModuleType: The imported Python module.
 
         Raises:
-            Exception: Possible exceptions encountered during module importing.
+            Exception: If the module could not be found or imported.
         """
         for path in custom_paths:
             if path.exists():
@@ -273,14 +276,14 @@ class Core():
     @staticmethod
     def _class_from_module(file_name: str) -> str:
         """
-        Parses a snake_case file name (without file extension) into a 
-        PascalCase class name.
+        Converts a snake_case file name to a PascalCase class name.
+
+        Function used to resolve the class name expected inside a plugin module.
 
         Arguments:
-            file_name (str): Name of a file without the file extension 
-                in snake_case format.
+            file_name (str): Snake_case module name (without extension).
         Returns:
-            str: A class name in PascalCase format.
+            str: Corresponding class name in PascalCase.
 
         Example:
             >>> class_name = _class_from_module("my_plugin_name")
@@ -289,4 +292,8 @@ class Core():
 
         """
         return "".join(token.capitalize() for token in file_name.split("_"))
-    
+
+
+if __name__ == "__main__":
+    core = Core()
+    core.run_ipanema()

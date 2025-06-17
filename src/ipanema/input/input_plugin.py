@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 
 class InputPlugin(ABC):
     """
-    Abstraction of an Ipanema's Input Plugin.
+    Abstraction base class for Ipanema's Input Plugin.
     
-    Type of Plugin dedicated to the parameter processing and parsing for an
-    arbitrary simulation.  
+    This type of plugin is responsible for processing and parsing parameters 
+    required for an arbitrary simulation.
     """
 
     @staticmethod
@@ -13,11 +13,9 @@ class InputPlugin(ABC):
     def get_params() -> dict:
         """
         Prepares data for a model initialization.
-        
-        Defines a dictionary containing the parameters needed by an arbitrary
-        Model Plugin.
 
         Returns:
-            dict: Dictionary formed by the expected parameters.
+            dict: A dictionary containing the parameters required by a 
+                Model Plugin.
         """
         pass

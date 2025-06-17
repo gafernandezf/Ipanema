@@ -21,3 +21,6 @@ readme = {file = "README.txt", content-type = "text/markdown"}
 include = [
   "src/*.py"
 ]
+
+[project.scripts]
+ipanema = "src.main:main"

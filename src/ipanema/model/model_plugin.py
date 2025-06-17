@@ -3,14 +3,14 @@ from iminuit import Minuit
 
 class ModelPlugin(ABC):
     """
-    Abstraction of an Ipanema's Model Plugin.
+    Abstract base class for Ipanema's Model Plugin.
     
-    Type of Plugin dedicated to the preparation of an arbitrary model to 
-    be fitted.
+    This type of plugin is responsible for preparing an arbitrary model 
+    to be fitted.
 
     Atributtes:
-        fit_manager (Minuit): Function minimizer and error computer used during
-            the fitting process
+        fit_manager (Minuit): Function minimizer and error estimator used during
+            the fitting process.
         parameters (dict): Dictionary containing the parameters required during 
             'fit_manager' initialization. 
     """
@@ -24,23 +24,23 @@ class ModelPlugin(ABC):
     @abstractmethod
     def prepare_fit(self) -> None:
         """
-        Prepares 'fit_manager' for its use.
+        Prepare 'fit_manager' for use.
         
-        Initializes 'fit_manager' using the 'parameters' previously provided.
+        Initializes 'fit_manager' using the previously provided parameters.
         """
         pass
 
     @property
     def fit_manager(self) -> Minuit:
-        """Getter for fit_manager property."""
+        """Get the fit_manager."""
         return self._fit_manager
     
     @fit_manager.setter
     def fit_manager(self, manager: Minuit):
-        """Setter for fit_manager property."""
+        """Set the fit_manager."""
         self._fit_manager = manager
     
     @property
     def parameters(self) -> dict:
-        """Getter for parameters property."""
+        """Get the parameters dictionary."""
         return self._parameters

@@ -4,6 +4,11 @@ class DefaultInput(InputPlugin):
 
     @staticmethod
     def get_params() -> dict:
-        """Prepares data for a model initialization."""
+        """
+        Prepare and return the default parameters for model initialization.
+
+        Returns:
+            dict: An empty dictionary representing the default parameters.
+        """
         params: dict = {}
         return params

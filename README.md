@@ -255,6 +255,6 @@ Use the **Execution** command in **Basic Commands** section.
 ***
 ### Basic Commands
 
-Execution: `hatch run python main.py`
+Execution: `hatch run python src/main.py`
 
 Testing: `hatch run pytest`

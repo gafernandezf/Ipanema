@@ -44,7 +44,7 @@ class CudaProgram():
         Parses the CUDA source code and separates the include directives
         from the main function body.
 
-        Args:
+        Arguments:
             src_code (str): Complete CUDA program as a string.
         """
         include_list: list[str] = []
