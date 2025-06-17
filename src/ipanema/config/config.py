@@ -12,7 +12,7 @@
 # -----------------------------------------------------------------------------
 CONFIG = {
 
-    "custom_paths": ['C:\\Users\\gabri\\OneDrive\\Escritorio\\MUEI\\3C'],
+    "custom_paths": [],
 
     "input": "signal_peak_input",
 
