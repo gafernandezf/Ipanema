@@ -13,7 +13,7 @@ class DefaultModel(ModelPlugin):
         """
         Initialize the DefaultModel with the given parameters.
 
-        Arguments:
+        Args:
             params (dict): Parameters to be used during model initialization.
         """
         super().__init__(params)

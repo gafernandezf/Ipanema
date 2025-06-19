@@ -14,7 +14,7 @@ class OutputPlugin(ABC):
         """
         Generate and present results for a fitted model.
 
-        Arguments:
+        Args:
             model (ModelPlugin): The fitted model to process results from.
         """
         pass

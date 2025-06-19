@@ -34,7 +34,7 @@ class InteractiveCudaManager(PyCudaManager):
         device. If 'interactive' is False the manager will select the default 
         device (first device found).
 
-        Arguments:
+        Args:
             idev (int): Device to work with.
             interactive (bool): Determine whether to ask for a device or 
                 to select the first device found.

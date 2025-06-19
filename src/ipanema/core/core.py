@@ -280,7 +280,7 @@ class Core():
 
         Function used to resolve the class name expected inside a plugin module.
 
-        Arguments:
+        Args:
             file_name (str): Snake_case module name (without extension).
         Returns:
             str: Corresponding class name in PascalCase.

@@ -33,16 +33,18 @@ class PyCudaManager(CudaManager, ABC):
             *args
     ) -> list:
         """
-        Runs a specific CUDA function previously registered.
+        Executes a registered CUDA kernel with the given arguments and 
+        returns specified output buffers.
 
-        Runs the CUDA source code, executes the kernel with the provided arguments,
-        and returns the results of output buffers.
+        This method runs a compiled CUDA function by name, sending all 
+        arguments to the GPU, and returning a list of output buffers as host 
+        copies based on 'outputs_idx' and 'outputs_details'.
 
-        Arguments:
+        Args:
             func_name (str): Name of the called function.
-            output_idx (list[int]): Indices of the arguments that are 
+            outputs_idx (list[int]): Indices of the arguments that are 
                 output buffers.
-            output_details (dict[int, tuple[tuple[int, ...], Any]): Formal
+            outputs_details (dict[int, tuple[tuple[int, ...], Any]): Formal
                 description of each argument following the structure
                 'output_idx : (shape, dtype)'.
             block (tuple[int, int, int], optional): CUDA block dimensions. 
@@ -51,12 +53,12 @@ class PyCudaManager(CudaManager, ABC):
                 Defaults to (1,1).
             *args: Parameters for the CUDA function.
 
-        Return:
+        Returns:
             list: List with each one of the outputs from the CUDA function
 
         Example:
             >>> outputs = cuda_manager.run_program(
-            ...     "MyKernel",
+            ...     "my_kernel",
             ...     [1],
             ...     {1: ((100,), np.float64)},
             ...     block=(256,1,1),
@@ -112,7 +114,7 @@ class PyCudaManager(CudaManager, ABC):
         Provides access to GPU-accelerated functions defined by 'pycuda.cumath'.
         Handles any GPU-compatible processing needed for its execution. 
 
-        Arguments:
+        Args:
             func_name (str): Name of the desired CUDA operation implemented 
                 by 'pycuda.cumath'.
             *args: List of arguments needed for the desired operation that will
@@ -141,10 +143,10 @@ class PyCudaManager(CudaManager, ABC):
         Performs a reduction operation for an array using 'pycuda.gpuarray'.
 
         Provides access to reduction operations (sum, max, min, etc.) defined 
-        by 'pycuda.cumath'. Handles any GPU-compatible processing needed for 
+        by 'pycuda.gpuarray'. Handles any GPU-compatible processing needed for 
         its execution. 
 
-        Arguments:
+        Args:
             op_name (str): Name of the desired reduction operation implemented 
                 by 'pycuda.gpuarray'.
             array (Any): Data array to be reduced.
@@ -175,7 +177,7 @@ class PyCudaManager(CudaManager, ABC):
         """
         Prepares parameters for GPU execution.
         
-        Arguments:
+        Args:
             arg (Any): argument to be processed.
             gpu_args (list): list where the processed argument will be added if
                 admitted.
@@ -218,6 +220,6 @@ class PyCudaManager(CudaManager, ABC):
 
     @_process_argument.register(list)
     def _(self, arg: list, gpu_args: list) -> None:
-        array = np.array(list)
+        array = np.array(arg)
         gpu_args.append(gpuarray.to_gpu(array))
 

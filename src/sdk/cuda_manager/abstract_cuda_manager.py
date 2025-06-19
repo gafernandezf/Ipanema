@@ -24,15 +24,17 @@ class CudaManager(ABC):
             *args
     ) -> list:
         """
-        Runs a specific CUDA function previously registered.
+        Executes a registered CUDA kernel with the given arguments and 
+        returns specified output buffers.
 
-        Runs the CUDA source code, executes the kernel with the provided arguments,
-        and returns the results of output buffers.
+        This method runs a compiled CUDA function by name, sending all 
+        arguments to the GPU, and returning a list of output buffers as host 
+        copies based on 'outputs_idx' and 'outputs_details'.
 
-        Arguments:
-            func_name (str): Name of the called function.
-            output_idx (list[int]): indices of the arguments that are 
-                output buffers.
+        Args:
+            func_name (str): Name of the CUDA function to execute.
+            output_idx (list[int]): Indices in 'args' corresponding to output 
+                buffers.
             output_details (dict[int, tuple[tuple[int, ...], Any]): Formal
                 description of each argument following the structure
                 'output_idx : (shape, dtype)'.
@@ -42,12 +44,12 @@ class CudaManager(ABC):
                 Defaults to (1,1).
             *args: Parameters for the CUDA function.
 
-        Return:
-            list: List with each one of the outputs from the CUDA function
+        Returns:
+            list: List with each one of the outputs from the CUDA function.
 
         Example:
             >>> outputs = cuda_manager.run_program(
-            ...     "MyKernel",
+            ...     "my_kernel",
             ...     [1],
             ...     {1: ((100,), np.float64)},
             ...     block=(256,1,1),
@@ -67,7 +69,7 @@ class CudaManager(ABC):
         Provides access to GPU-accelerated functions defined by a specific CUDA
         library. Handles any GPU-compatible processing needed for its execution. 
 
-        Arguments:
+        Args:
             func_name (str): Name of the desired CUDA operation implemented 
                 by a specific CUDA library.
             *args: List of arguments needed for the desired operation that will
@@ -91,7 +93,7 @@ class CudaManager(ABC):
         by a specific CUDA library. Handles any GPU-compatible processing 
         needed for its execution. 
 
-        Arguments:
+        Args:
             op_name (str): Name of the desired reduction operation implemented 
                 by the specific CUDA library.
             array (Any): Data array to be reduced.
@@ -106,28 +108,24 @@ class CudaManager(ABC):
 
     def add_code_fragment(self, name: str, function: str | Path) -> None:
         """
-        Adds a CUDA code fragment to the storage of the manager.
+        Registers a new CUDA code fragment by name.
 
-        Registers a CUDA code fragment identified as 'name'.
-
-        Arguments:
-            name (str): Name assigned to the code fragment.
-            function (str | Path): Source code of the code fragment or Path
-                of the file where the source code resides. 
+        Args:
+            name (str): Identifier for the code fragment.
+            function (str | Path): CUDA source code string or path 
+                to the file.
         """
         self.__src_code[name] = CudaProgram(function)
 
     def pop_code_fragment(self, name: str) -> str:
         """
-        Deletes a CUDA code fragment to the storage of the manager.
+        Removes and returns a previously registered CUDA code fragment.
 
-        Removes a CUDA code fragment identified as 'name'.
-
-        Arguments:
-            name (str): Name assigned to the code fragment.
+        Args:
+            name (str): Identifier of the code fragment to remove.
 
         Returns:
-            str: Source code of the code fragment identified as name.
+            str: The combined CUDA source code for the removed fragment.
         """
         program = self.__src_code.pop(name)
         program.includes.append(program.functions)
