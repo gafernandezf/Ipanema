@@ -24,15 +24,18 @@
 
 ***
 ### Description
-This new version of Ipanema is designed to simplify the implementation process for any needed simulation. It separates the original workflow into a pipeline of simple plugins users can modify. Ipanema handles the remaining steps automatically.
 
-In any specific implementation you will need at least 3 plugins:
+High Energy physics is a branch of physics  devoted to investigating the most fundamental constituents of matter as well as how they behave. Advancing in this field requires not only highly sophisticated experimentation methods but also specialized tools tailored to this purpose. Ipanema is defined as a statistical analysis framework used for this task. It is used by some of the research teams at \emph{Conseil Européen pour la Recherche Nucléaire} (CERN).
 
-1. **Input Plugin:** Data preparation for your model. Any parameter the model might need must be stored in its dictionary.
+This new version of Ipanema is designed to simplify the implementation process for any needed simulation. It separates the original workflow into a pipeline of simple plugins that users can modify. Ipanema handles the remaining steps automatically.
+
+Any specific implementation will require at least three plugins:
+
+1. **Input Plugin:** Prepares data for your model. All parameters required by the model must be stored in its dictionary.
 
 2. **Model Plugin:** Model definition. FCN declaration, Minuit initialization, etc. Any process needed for a model fitting.
 
-3. **Output Plugin(s):** Handles model execution and processes results for presentation. You may set multiple Output Plugins (e.g., one for printing results, another for plotting data, etc.)
+3. **Output Plugin(s):** Executes the model and processes the results for presentation. You may set multiple Output Plugins (e.g., one for printing results, another for plotting data, etc.).
 
 The system contains two main modules inside `src`. `ipanema` (which is the core of the system) and `sdk` (which is a custom Software Development Kit designed for Ipanema).  
 
@@ -42,7 +45,7 @@ This module contains 5 main packages:
 
 1. **Config:**  Inside this package resides `config.py`. This file is used to indicate to Ipanema which plugins should be executed. You can also specify any custom file paths used in your simulation. 
 
-2. **Core:** Contains the main pipeline Ipanema uses to dynamically load and execute plugins. You might not need to modify anything in this package.
+2. **Core:** Contains the main pipeline Ipanema uses to dynamically load and execute plugins. It is unlikely that you will need to modify this package.
 
 3. **Input:** Defines the interface which defines the required structure for Input Plugins. It also has a directory named `implementations/`. This directory contains a default and an example implementation of Input Plugins. You may use this directory to store your own Input Plugin implementations.
 
@@ -52,11 +55,9 @@ This module contains 5 main packages:
 
 #### SDK
 
-Its name stands for **Software Development Kit**. This module provides a set of support libraries users may use for their own implementations.
+Its name stands for **Software Development Kit**. This module provides a set of support libraries users may use for their own implementations. Its present version has 2 main packages: 
 
-Its present version has 2 main packages: 
-
-- **CUDA Manager:** This package contains different implementations of a `CudaManager` designed for compiling and executing CUDA code in a simple and unified manner. It allows users to use High Performance Computing operations without having knowledge of any particular library. It also supports reduction operations over arrays, as well as element-wise operations. In this version, the implementations of this manager use `PyCuda`.
+- **CUDA Manager:** This package contains different implementations of a `CudaManager` designed for compiling and executing CUDA code in a simple and unified manner. It allows users to use High Performance Computing operations without having knowledge of any particular library. It also supports reduction operations over arrays, as well as element-wise operations. In this version, the implementations of this manager uses `PyCuda`.
 
 - **Math Utils:** This package is intended to contain different utilities involving mathematical operations users may need.
 
@@ -228,6 +229,8 @@ CONFIG = {
 
 ***
 ### Getting Started
+
+Note that for this process it is assumed users have previously installed and updated their CUDA drivers. Users using Windows will also require Visual Studio Build Tools.
 
 #### 1. Clone the repository
 ```bash
