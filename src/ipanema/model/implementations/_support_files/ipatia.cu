@@ -1,3 +1,7 @@
+// Original code Copyright (C) Diego Martinez Santos
+// Licensed under the GNU Affero General Public License v3.0
+// Modifications Copyright (C) 2025 Gabriel Alejandro Fernandez Fernandez
+
 #include <math.h>
 
 __device__ double log_apIpatia(double x, double mu, double sigma, double l, double beta,  double a, double n,  double a2, double n2) {
