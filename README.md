@@ -25,7 +25,7 @@
 ***
 ### Description
 
-High Energy physics is a branch of physics  devoted to investigating the most fundamental constituents of matter as well as how they behave. Advancing in this field requires not only highly sophisticated experimentation methods but also specialized tools tailored to this purpose. Ipanema is defined as a statistical analysis framework used for this task. It is used by some of the research teams at _Conseil Européen pour la Recherche Nucléaire_ (CERN).
+High Energy physics is a branch of physics  devoted to investigating the most fundamental constituents of matter as well as how they behave. Advancing in this field requires not only highly sophisticated experimentation methods but also specialized tools tailored to this purpose. Ipanema is defined as a statistical analysis framework used for this task. It is used by some of the research teams at CERN (Conseil Européen pour la Recherche Nucléaire).
 
 This new version of Ipanema is designed to simplify the implementation process for any needed simulation. It separates the original workflow into a pipeline of simple plugins that users can modify. Ipanema handles the remaining steps automatically.
 
